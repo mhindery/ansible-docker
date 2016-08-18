@@ -1,0 +1,82 @@
+# DATA-ONLY CONTAINER
+data:
+ container_name: vtk_data
+ image: busybox
+ volumes:
+  - .:/data
+
+# WEB CONTAINERS
+web1:
+ restart: always
+ container_name: ans-web1
+ build: .
+ dockerfile: client/Dockerfile
+ stdin_open: true
+ tty: true
+ working_dir: /data
+ expose: 
+  - 80
+  - 443
+  - 22
+
+web2:
+ restart: always
+ container_name: ans-web2
+ build: .
+ dockerfile: client/Dockerfile
+ volumes_from: 
+  - data
+ stdin_open: true
+ tty: true
+ working_dir: /data
+ expose: 
+  - 80
+  - 443
+  - 22
+
+# DB CONTAINERS
+db1:
+ restart: always
+ container_name: ans-db1
+ build: .
+ dockerfile: client/Dockerfile
+ volumes_from: 
+  - data
+ stdin_open: true
+ tty: true
+ working_dir: /data
+ expose: 
+  - 5432
+  - 22
+
+db2:
+ restart: always
+ container_name: ans-db2
+ build: .
+ dockerfile: client/Dockerfile
+ volumes_from: 
+  - data
+ stdin_open: true
+ tty: true
+ working_dir: /data
+ expose: 
+  - 5432
+  - 22
+
+# CONTROL CONTAINER
+control:
+ restart: always
+ container_name: ans-control
+ build: .
+ dockerfile: control/Dockerfile
+ volumes_from: 
+  - data
+ working_dir: /data
+ stdin_open: true
+ tty: true
+ command: bash
+ links: 
+  - web1
+  - web2
+  - db1
+  - db2
